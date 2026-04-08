@@ -16,21 +16,35 @@ const createUniqueShortId = async(req, res) => {
 
     res.json({id: shortId});
 };
-
-const getURl = async(req, res) => {
+const getURl = async (req, res) => {
     const shortID = req.params.id;
-    console.log(shortID);
+
     const foundUrl = await URL.findOneAndUpdate(
-    { shortID: shortID },
-    {
-        $push: {
-            visitHistory: { timestamp: new Date() }
-        }
-    },
-    { new: true }
+        { shortID: shortID },
+        {
+            $push: {
+                visitHistory: { timestamp: new Date() }
+            }
+        },
+        { new: true }
     );
-    res.json({message: foundUrl.redirectURL});
-}
+
+    if (!foundUrl) {
+        return res.status(404).send("Short URL not found");
+    }
+    res.redirect(foundUrl.redirectURL);
+};
+const getAnalytics = async (req, res) => {
+    const shortID = req.params.id;
+
+    const url = await URL.findOne({shortID});
+    console.log(url);
+    
+    res.json({
+        totalClicks: url.visitHistory.length,
+        analytics: url.visitHistory
+    });
+};
 
 
-module.exports = {createUniqueShortId, getURl};
+module.exports = {createUniqueShortId, getURl, getAnalytics};

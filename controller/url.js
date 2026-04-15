@@ -3,7 +3,6 @@ const URL = require('../model/url.js');
 const createUniqueShortId = async(req, res) => {
     const url = req.body.redirectURL;
     const {nanoid} =  await import('nanoid');
-    console.log(nanoid);
 
     if (!url) {
     return res.status(400).json({ message: "URL is required" });
@@ -12,9 +11,11 @@ const createUniqueShortId = async(req, res) => {
     const shortUrl = await URL.create({
         shortID : shortId,
         redirectURL: url,
+        createdBy: req.user.id,
+        visitHistory: [],
     });
 
-    res.json({id: shortId});
+    res.json({id: shortId, url: shortUrl});
 };
 const getURl = async (req, res) => {
     const shortID = req.params.id;
